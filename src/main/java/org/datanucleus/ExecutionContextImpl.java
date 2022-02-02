@@ -250,22 +250,20 @@ public class ExecutionContextImpl implements ExecutionContext, TransactionEventL
 
     /**
      * Constructor.
-     * TODO userName/password aren't currently used and we always use the PMF/EMF userName/password.
      * @param ctx NucleusContext
-     * @param owner Owning object (for bytecode enhancement contract, PersistenceManager)
-     * @param options Any options affecting startup
      * @throws NucleusUserException if an error occurs allocating the necessary requested components
      */
-    public ExecutionContextImpl(PersistenceNucleusContext ctx, Object owner, Map<String, Object> options)
+    public ExecutionContextImpl(PersistenceNucleusContext ctx)
     {
         this.nucCtx = ctx;
-
-        initialise(owner, options);
-
         // Set up the Level 1 Cache
         initialiseLevel1Cache();
     }
 
+    /**
+     * @param owner Owning object (for bytecode enhancement contract, PersistenceManager)
+     * @param options Any options affecting startup
+     */
     public void initialise(Object owner, Map<String, Object> options)
     {
         // TODO Make use of the username+password (for JDO). How? need new StoreManager maybe?

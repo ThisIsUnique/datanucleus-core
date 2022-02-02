@@ -58,13 +58,13 @@ public class ExecutionContextPool
         }
     }
 
-    protected ExecutionContext create(Object owner, Map<String, Object> options)
+    protected ExecutionContext create()
     {
         if (nucCtx.getConfiguration().getBooleanProperty(PropertyNames.PROPERTY_MULTITHREADED))
         {
-            return new ExecutionContextThreadedImpl(nucCtx, owner, options);
+            return new ExecutionContextThreadedImpl(nucCtx);
         }
-        return new ExecutionContextImpl(nucCtx, owner, options);
+        return new ExecutionContextImpl(nucCtx);
     }
 
     public boolean validate(ExecutionContext ec)
@@ -79,41 +79,31 @@ public class ExecutionContextPool
 
     public synchronized ExecutionContext checkOut(Object owner, Map<String, Object> options)
     {
-        long now = System.currentTimeMillis();
-        ExecutionContext ec;
+        ExecutionContext ec = null;
         if (!recyclableECs.isEmpty())
         {
+            long now = System.currentTimeMillis();
             Iterator<Entry<ExecutionContext, Long>> recycIter = recyclableECs.entrySet().iterator();
-            while (recycIter.hasNext())
+            while (recycIter.hasNext() && ec == null)
             {
                 Entry<ExecutionContext, Long> recycEntry = recycIter.next();
                 ec = recycEntry.getKey();
-                if ((now - recycEntry.getValue()) > expirationTime)
+                if ((now - recycEntry.getValue()) > expirationTime || !validate(ec))
                 {
-                    // object has expired
-                    recycIter.remove();
+                    // object has expired or failed validation
                     expire(ec);
                     ec = null;
                 }
-                else
-                {
-                    if (validate(ec))
-                    {
-                        recycIter.remove();
-                        ec.initialise(owner, options);
-                        return ec;
-                    }
-
-                    // object failed validation
-                    recycIter.remove();
-                    expire(ec);
-                    ec = null;
-                }
+                recycIter.remove();
             }
         }
 
-        // no objects available, create a new one
-        ec = create(owner, options);
+        if ( ec == null )
+        {
+            // no object available, create a new one
+            ec = create();
+        }
+        ec.initialise(owner, options);
         return ec;
     }
 

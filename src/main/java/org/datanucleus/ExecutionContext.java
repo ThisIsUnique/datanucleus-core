@@ -74,6 +74,11 @@ public interface ExecutionContext extends ExecutionContextReference
     /** Startup option setting whether, when using JTA, to do auto-join of transactions. */
     public static final String OPTION_JTA_AUTOJOIN = "jta_autojoin";
 
+    /**
+     * Initialise context with owner and options
+     * @param owner Owning object (for bytecode enhancement contract, PersistenceManager)
+     * @param options Any options affecting startup
+     */
     void initialise(Object owner, Map<String, Object> options);
 
     Level1Cache getLevel1Cache();

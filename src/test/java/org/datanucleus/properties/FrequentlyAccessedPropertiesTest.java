@@ -20,15 +20,9 @@ package org.datanucleus.properties;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.datanucleus.*;
 import org.junit.Assert;
 
-import org.datanucleus.ClassLoaderResolver;
-import org.datanucleus.Configuration;
-import org.datanucleus.ExecutionContext;
-import org.datanucleus.ExecutionContextImpl;
-import org.datanucleus.PersistenceNucleusContext;
-import org.datanucleus.PersistenceNucleusContextImpl;
-import org.datanucleus.PropertyNames;
 import org.datanucleus.store.AbstractStoreManager;
 import org.datanucleus.store.query.Query;
 import org.junit.Test;
@@ -56,8 +50,8 @@ public class FrequentlyAccessedPropertiesTest
         
         Assert.assertFalse(conf.getFrequentProperties().getDetachAllOnCommit());
         Assert.assertTrue(conf.getFrequentProperties().getDetachOnClose());
-        
-        ExecutionContextImpl ec = new ExecutionContextImpl(ctx, null, new HashMap<String, Object>());
+        ExecutionContextPool ecPool = new ExecutionContextPool(ctx);
+        ExecutionContext ec = ecPool.checkOut(null, new HashMap<>());
         Assert.assertTrue(ec.getTransaction().getOptimistic());
         ec.setProperty(PropertyNames.PROPERTY_OPTIMISTIC, "false");
         Assert.assertFalse(ec.getTransaction().getOptimistic());
